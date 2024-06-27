@@ -1,0 +1,44 @@
+<?php
+
+class MainController { 
+    private $nameTable = "usuarios";  
+
+    public static function crear() {
+        header('Content-Type: application/json'); // Asegúrate de que la respuesta sea JSON
+
+        // Procesar la solicitud POST
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+        
+        $validation = false;
+        $message = '';
+        $responseData = [];
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $message = 'Error al decodificar el JSON';
+            $responseData = ['success' => $validation, 'message' => $message, 'data' => null];
+        } elseif (empty($data) || self::arrayValuesEmpty($data)) {
+            $validation = false;
+            $message = 'Datos vacíos';
+            $responseData = ['success' => $validation, 'message' => $message, 'data' => null];
+        } else {
+            $validation = true;
+            $message = 'Datos recibidos';
+            $responseData = ['success' => $validation, 'message' => $message, 'data' => $data];
+        }
+
+        echo json_encode($responseData);
+        exit; // Asegúrate de que no haya más salida después de esto
+    }
+
+    private static function arrayValuesEmpty($array) {
+        foreach ($array as $value) {
+            if (!empty($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+?>

@@ -1,0 +1,43 @@
+
+como hago para que $result lo devuelva un array y console.log(result) lo reciba pueda operarar desde result
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+<?php
+// Incluir el archivo de configuración de la base de datos y los modelos
+require_once 'Conexion.php';
+require_once 'DataAccessInterface.php';
+require_once 'DatabaseHandler.php';
+require_once 'DynamicQuery.php';
+require_once 'MainController.php';  // Asegúrate de que este archivo existe
+
+// Obtener la URL solicitada
+$url = isset($_GET['url']) ? $_GET['url'] : 'index/index';
+
+// Imprimir la URL solicitada para depuración
+//echo "URL solicitada: " . $url . "<br>";
+
+// Dividir la URL en partes
+$urlParts = explode('/', rtrim($url, '/'));
+//echo "Partes de la URL: ";
+//print_r($urlParts);
+//echo "<br>";
+
+// Obtener el controlador y el método
+$controllerName = 'MainController'; // Usamos el controlador principal
+$methodName = isset($urlParts[1]) ? $urlParts[1] : 'crear';
+
+// Verificar si el método existe en el archivo del controlador
+if (method_exists($controllerName, $methodName)) {
+    // Llamar al método    
+    $result = call_user_func([$controllerName, $methodName]);
+    if(is_array($result) && isset($result['success']) && isset($result['message'])){
+        echo 'Success: ' . var_export($result['success'], true)."\n";
+        echo 'Message: ' . $result['message']. "\n";
+        //echo $result;
+    }
+   
+} else {
+    // Mostrar página de error 404
+    include 'error-404.php';
+}
+?>

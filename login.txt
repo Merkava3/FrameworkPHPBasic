@@ -1,0 +1,87 @@
+<?php
+
+use Modelo\DynamicQuery;
+use Utilidades\Helper;
+
+require_once 'DataValidator.php';
+require_once 'DynamicQuery.php';
+require_once 'Helper.php';
+
+class MainController {    
+    public static function crear() {
+        header('Content-Type: application/json'); // Asegúrate de que la respuesta sea JSON
+
+        // Procesar la solicitud POST
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+        
+        $Query = new DynamicQuery("usuario");
+
+        $validation = false;
+        $message = '';
+        $responseData = [];
+        
+        // Validar JSON
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $message = 'Error al decodificar el JSON';
+            $responseData = ['success' => $validation, 'message' => $message, 'data' => null];
+        } else {
+            // Validar los datos
+            $errors = DataValidator::validateData($data);
+            if (!empty($errors)) {
+                $message = 'Datos inválidos';
+                $responseData = ['success' => $validation, 'message' => $message, 'errors' => $errors];
+            } elseif (empty($data) || self::arrayValuesEmpty($data)) {
+                $message = 'Datos vacíos';
+                $responseData = ['success' => $validation, 'message' => $message, 'data' => null];
+            } else {
+                $result = $Query->created($data);
+                if ($result['success']) {
+                    $validation = true;
+                    $message = 'Datos recibidos y guardados';
+                } else {
+                    $message = 'Error al guardar los datos: ' . $result['message'];
+                }
+                $responseData = ['success' => $validation, 'message' => $message, 'data' => $data];
+            }
+        }
+
+        echo json_encode($responseData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit; // Asegúrate de que no haya más salida después de esto
+    }
+
+    private static function arrayValuesEmpty($array) {
+        foreach ($array as $value) {
+            if (!empty($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Método para manejar el login
+    public static function login() {
+        header('Content-Type: application/json');
+        
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+
+        $Query = new DynamicQuery("usuario");
+
+        // Obtener el usuario por algún campo único, como el correo electrónico
+        $result = $Query->executeQuery("SELECT * FROM usuario WHERE email = ?", 's', [$data['email']]);
+        if ($result['success'] && !empty($result['data'])) {
+            $usuario = $result['data'][0];
+            if (Helper::verificarContraseña($data['pws'], $usuario['pws'])) {
+                echo json_encode(['success' => true, 'message' => 'Login exitoso', 'data' => $usuario], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Contraseña incorrecta'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Usuario no encontrado'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        }
+        
+        exit;
+    }
+}
+?>

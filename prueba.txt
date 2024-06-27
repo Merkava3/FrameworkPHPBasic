@@ -1,0 +1,17 @@
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+
+// Obtener el contenido del cuerpo de la solicitud
+$input = file_get_contents("php://input");
+echo "datos : ".$input;
+
+// Decodificar el contenido JSON a un array asociativo
+$data = json_decode($input, true);
+echo $data;
+
+// Verificar que los datos se hayan decodificado correctamente
+if (json_last_error() === JSON_ERROR_NONE) {
+    echo "hola que tal";
+} else {
+    echo "Error al decodificar el JSON";
+}
