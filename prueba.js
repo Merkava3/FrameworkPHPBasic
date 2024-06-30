@@ -4,7 +4,8 @@ import  {UrlUserInsert,
         UrlUserGetId, 
         UrlUserUpdate,
         UrlUserLogin, 
-        UrlUserSesion } from "./utils.js";
+        UrlUserSesion,
+        UrlChatGpt, } from "./utils.js";
 
 async function crear_usuario() {
     let indentificacion = prompt("Ingrese identificacion :");
@@ -249,6 +250,23 @@ async function update(){
         }
     }
 
+
+async function ChatGpt(){
+    //let msg = prompt("Ingrese el mensaje : ")
+    try {
+        const response = await fetch( UrlChatGpt,{
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+            
+        });
+        const result = await response.text();
+        console.log(result);
+        
+    } catch (error) {
+        
+    }
+}
+
     
 
 
@@ -262,8 +280,9 @@ async function update(){
 //Delete();
 //getIdUpdate();
 //update();
-login();
+//login();
 //UserSesion();
+ChatGpt();
 
 
 
